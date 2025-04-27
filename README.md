@@ -19,7 +19,7 @@ Official code for CVPR 2021 paper 'Parser-Free Virtual Try-on via Distilling App
 ## CUDA installation
 
 1. Install driver **355.85-quadro-grid-desktop-notebook-win10-64bit-international-whql.exe**
-2. Install **CUDA Toolkit 10.2** that support your Cuda-version graphic-card (by Cuda compatibility): **cuda_10.2.89_441.22_win10.exe**
+2. Install **CUDA Toolkit 10.2** that support your CUDA-version graphic-card (by compatibility): **cuda_10.2.89_441.22_win10.exe**
 3. Install pyton suppport **CUDA Toolkit 10.2** from https://pytorch.org/get-started/previous-versions:
 ```bash
 pip install torch==1.12.1+cu102 torchvision==0.13.1+cu102 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu102
