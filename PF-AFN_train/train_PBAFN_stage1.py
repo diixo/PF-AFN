@@ -13,9 +13,10 @@ from tensorboardX import SummaryWriter
 import cv2
 import datetime
 
+
 opt = TrainOptions().parse()
-path = 'runs/'+opt.name
-os.makedirs(path,exist_ok=True)
+path = 'runs/' + opt.name
+os.makedirs(path, exist_ok=True)
 
 def CreateDataset(opt):
     from data.aligned_dataset import AlignedDataset
@@ -24,7 +25,7 @@ def CreateDataset(opt):
     dataset.initialize(opt)
     return dataset
 
-os.makedirs('sample',exist_ok=True)
+os.makedirs('sample', exist_ok=True)
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
 
 torch.cuda.set_device(opt.local_rank)
@@ -80,7 +81,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         save_fake = True
 
         t_mask = torch.FloatTensor((data['label'].cpu().numpy()==7).astype(np.float))
-        data['label'] = data['label']*(1-t_mask)+t_mask*4
+        data['label'] = data['label']*(1-t_mask) + t_mask*4
         edge = data['edge']
         pre_clothes_edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int))
         clothes = data['color']
@@ -92,14 +93,14 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         size = data['label'].size()
         oneHot_size1 = (size[0], 25, size[2], size[3])
         densepose = torch.cuda.FloatTensor(torch.Size(oneHot_size1)).zero_()
-        densepose = densepose.scatter_(1,data['densepose'].data.long().cuda(),1.0)
+        densepose = densepose.scatter_(1,data['densepose'].data.long().cuda(), 1.0)
         densepose_fore = data['densepose']/24.0
         face_mask = torch.FloatTensor((data['label'].cpu().numpy()==1).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==12).astype(np.int))
         other_clothes_mask = torch.FloatTensor((data['label'].cpu().numpy()==5).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==6).astype(np.int)) + \
                              torch.FloatTensor((data['label'].cpu().numpy()==8).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==9).astype(np.int)) + \
                              torch.FloatTensor((data['label'].cpu().numpy()==10).astype(np.int))
-        preserve_mask = torch.cat([face_mask,other_clothes_mask],1)
-        concat = torch.cat([preserve_mask.cuda(),densepose,pose.cuda()],1)
+        preserve_mask = torch.cat([face_mask,other_clothes_mask], 1)
+        concat = torch.cat([preserve_mask.cuda(),densepose,pose.cuda()], 1)
 
         flow_out = model(concat.cuda(), clothes.cuda(), pre_clothes_edge.cuda())
         warped_cloth, last_flow, _1, _2, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all = flow_out
@@ -144,7 +145,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             e = warped_cloth
             f = torch.cat([warped_prod_edge,warped_prod_edge,warped_prod_edge],1)
             combine = torch.cat([a[0],b[0],c[0],d[0],e[0],f[0]], 2).squeeze()
-            cv_img=(combine.permute(1,2,0).detach().cpu().numpy()+1)/2
+            cv_img=(combine.permute(1,2,0).detach().cpu().numpy() + 1)/2
             writer.add_image('combine', (combine.data + 1) / 2.0, step)
             rgb=(cv_img*255).astype(np.uint8)
             bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
