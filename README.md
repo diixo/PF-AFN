@@ -16,7 +16,11 @@ Official code for CVPR 2021 paper 'Parser-Free Virtual Try-on via Distilling App
 [[VGG_Model]](https://drive.google.com/file/d/1Mw24L52FfOT9xXm3I1GL8btn7vttsHd9/view?usp=sharing)
 
 
-## CUDA installation
+## Installation
+
+```bash
+pip install cupy-cuda102
+```
 
 1. Install driver **355.85-quadro-grid-desktop-notebook-win10-64bit-international-whql.exe**
 2. Install **CUDA Toolkit 10.2** that support your CUDA-version graphic-card (by compatibility): **cuda_10.2.89_441.22_win10.exe**
