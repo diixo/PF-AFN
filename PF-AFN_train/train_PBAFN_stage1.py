@@ -1,7 +1,7 @@
 import time
 from options.train_options import TrainOptions
-from models.networks import VGGLoss,save_checkpoint
-from models.afwm import TVLoss,AFWM
+from models.networks import VGGLoss, save_checkpoint
+from models.afwm import TVLoss, AFWM
 import torch.nn as nn
 import torch.nn.functional as F
 import os
@@ -15,6 +15,7 @@ import datetime
 
 
 opt = TrainOptions().parse()
+
 path = 'runs/' + opt.name
 os.makedirs(path, exist_ok=True)
 
