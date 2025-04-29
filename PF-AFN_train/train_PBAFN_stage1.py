@@ -90,7 +90,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
     if epoch != start_epoch:
         epoch_iter = epoch_iter % dataset_size
 
-    train_sampler.set_epoch(epoch)
+    if train_sampler: train_sampler.set_epoch(epoch)
 
     for i, data in enumerate(train_loader):
         iter_start_time = time.time()
@@ -111,17 +111,17 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         pose = data['pose']
         size = data['label'].size()
         oneHot_size1 = (size[0], 25, size[2], size[3])
-        densepose = torch.cuda.FloatTensor(torch.Size(oneHot_size1)).zero_()
-        densepose = densepose.scatter_(1,data['densepose'].data.long().cuda(), 1.0)
+        densepose = torch.zeros(oneHot_size1, dtype=torch.float32, device=device)
+        densepose = densepose.scatter_(1, data['densepose'].data.long().to(device), 1.0)
         densepose_fore = data['densepose']/24.0
         face_mask = torch.FloatTensor((data['label'].cpu().numpy()==1).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==12).astype(np.int))
         other_clothes_mask = torch.FloatTensor((data['label'].cpu().numpy()==5).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==6).astype(np.int)) + \
                              torch.FloatTensor((data['label'].cpu().numpy()==8).astype(np.int)) + torch.FloatTensor((data['label'].cpu().numpy()==9).astype(np.int)) + \
                              torch.FloatTensor((data['label'].cpu().numpy()==10).astype(np.int))
         preserve_mask = torch.cat([face_mask,other_clothes_mask], 1)
-        concat = torch.cat([preserve_mask.cuda(),densepose,pose.cuda()], 1)
+        concat = torch.cat([preserve_mask.to(device), densepose, pose.to(device)], 1)
 
-        flow_out = model(concat.cuda(), clothes.cuda(), pre_clothes_edge.cuda())
+        flow_out = model(concat.to(device), clothes.to(device), pre_clothes_edge.to(device))
         warped_cloth, last_flow, _1, _2, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all = flow_out
         warped_prod_edge = x_edge_all[4]
 
@@ -132,9 +132,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         for num in range(5):
             cur_person_clothes = F.interpolate(person_clothes, scale_factor=0.5**(4-num), mode='bilinear')
             cur_person_clothes_edge = F.interpolate(person_clothes_edge, scale_factor=0.5**(4-num), mode='bilinear')
-            loss_l1 = criterionL1(x_all[num], cur_person_clothes.cuda())
-            loss_vgg = criterionVGG(x_all[num], cur_person_clothes.cuda())
-            loss_edge = criterionL1(x_edge_all[num], cur_person_clothes_edge.cuda())
+            loss_l1 = criterionL1(x_all[num], cur_person_clothes.to(device))
+            loss_vgg = criterionVGG(x_all[num], cur_person_clothes.to(device))
+            loss_edge = criterionL1(x_edge_all[num], cur_person_clothes_edge.to(device))
             b,c,h,w = delta_x_all[num].shape
             loss_flow_x = (delta_x_all[num].pow(2)+ epsilon*epsilon).pow(0.45)
             loss_flow_x = torch.sum(loss_flow_x) / (b*c*h*w)
@@ -154,15 +154,15 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         ############## Display results and errors ##########
 
         path = 'sample/'+opt.name
-        os.makedirs(path,exist_ok=True)
+        os.makedirs(path, exist_ok=True)
         if step % 1000 == 0:
           if opt.local_rank == 0:
-            a = real_image.float().cuda()
-            b = person_clothes.cuda()
-            c = clothes.cuda()
-            d = torch.cat([densepose_fore.cuda(),densepose_fore.cuda(),densepose_fore.cuda()],1)
+            a = real_image.float().to(device)
+            b = person_clothes.to(device)
+            c = clothes.to(device)
+            d = torch.cat([densepose_fore.to(device), densepose_fore.to(device), densepose_fore.to(device)], 1)
             e = warped_cloth
-            f = torch.cat([warped_prod_edge,warped_prod_edge,warped_prod_edge],1)
+            f = torch.cat([warped_prod_edge, warped_prod_edge, warped_prod_edge], 1)
             combine = torch.cat([a[0],b[0],c[0],d[0],e[0],f[0]], 2).squeeze()
             cv_img=(combine.permute(1,2,0).detach().cpu().numpy() + 1)/2
             writer.add_image('combine', (combine.data + 1) / 2.0, step)
@@ -180,7 +180,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         now = time_stamp.strftime('%Y.%m.%d-%H:%M:%S')
         if step % 100 == 0:
           if opt.local_rank == 0:
-            print('{}:{}:[step-{}]--[loss-{:.6f}]--[ETA-{}]'.format(now, epoch_iter,step, loss_all,eta))
+            print('{}:{}:[step-{}]--[loss-{:.6f}]--[ETA-{}]'.format(now, epoch_iter,step, loss_all, eta))
 
         if epoch_iter >= dataset_size:
             break
