@@ -115,7 +115,8 @@ class AlignedDataset(BaseDataset):
         return input_dict
 
     def __len__(self):
-        return len(self.A_paths) // (self.opt.batchSize * self.opt.num_gpus) * (self.opt.batchSize * self.opt.num_gpus)
+        num_cores = self.opt.num_gpus if self.opt.num_gpus > 0 else 1
+        return len(self.A_paths) // (self.opt.batchSize * num_cores) * (self.opt.batchSize * num_cores)
 
     def name(self):
         return 'AlignedDataset'
