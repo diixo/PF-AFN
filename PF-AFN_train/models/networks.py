@@ -1,9 +1,10 @@
+import os
 import torch
 import torch.nn as nn
-import torch.nn.parallel
-from torchvision import models
 from options.train_options import TrainOptions
-import os
+from torchvision import models
+from torchvision.models import VGG19_Weights
+
 
 opt = TrainOptions().parse()
 
@@ -122,7 +123,7 @@ class ResUnetSkipConnectionBlock(nn.Module):
 class Vgg19(nn.Module):
     def __init__(self, requires_grad=False):
         super(Vgg19, self).__init__()
-        vgg_pretrained_features = models.vgg19(pretrained=True).features
+        vgg_pretrained_features = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
         self.slice1 = nn.Sequential()
         self.slice2 = nn.Sequential()
         self.slice3 = nn.Sequential()
@@ -155,7 +156,8 @@ class VGGLoss(nn.Module):
     def __init__(self, layids = None):
         super(VGGLoss, self).__init__()
         self.vgg = Vgg19()
-        self.vgg.cuda()
+        if torch.cuda.is_available():
+            self.vgg = self.vgg.cuda()
         self.criterion = nn.L1Loss()
         self.weights = [1.0/32, 1.0/16, 1.0/8, 1.0/4, 1.0]
         self.layids = layids
