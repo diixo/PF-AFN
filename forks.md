@@ -1,30 +1,32 @@
 
-* https://github.com/ainoviq/PF-AFN
+## Forks
 
-RMGN
+https://github.com/ainoviq/PF-AFN
 
-* https://github.com/yatarousan0227/PF-AFN
+* RMGN
 
-VITON-HD
+https://github.com/yatarousan0227/PF-AFN
 
-* https://github.com/stylista-ai/vton-pf-afn
+* VITON-HD
 
-* https://github.com/sjhpark/Virtual-Try-On-Deployment-Kit
+https://github.com/stylista-ai/vton-pf-afn
 
-Description: https://github.com/sjhpark/Virtual-Try-On-Deployment-Kit/blob/main/PF-AFN_train/train_PBAFN_stage1.py
+https://github.com/sjhpark/Virtual-Try-On-Deployment-Kit
 
-* https://github.com/Pranavug/PF-AFN
+* Description: https://github.com/sjhpark/Virtual-Try-On-Deployment-Kit/blob/main/PF-AFN_train/train_PBAFN_stage1.py
 
-Resize
+https://github.com/Pranavug/PF-AFN
 
-* https://github.com/nureenbarakat/PF-AFN
+* Resize
 
-Resize + Replace (\\,/)
+https://github.com/nureenbarakat/PF-AFN
 
-* https://github.com/nftblackmagic/PF-AFN
+* Resize + Replace (\\,/)
 
-* https://github.com/kayabutterkun/PF-AFN
+https://github.com/nftblackmagic/PF-AFN
 
-* https://github.com/henar2441/PF-AFN
+https://github.com/kayabutterkun/PF-AFN
 
-* https://github.com/goncalo-swan/PF-AFN
+https://github.com/henar2441/PF-AFN
+
+https://github.com/goncalo-swan/PF-AFN
