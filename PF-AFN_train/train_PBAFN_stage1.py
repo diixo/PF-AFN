@@ -29,30 +29,48 @@ def CreateDataset(opt):
 os.makedirs('sample', exist_ok=True)
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
 
-torch.cuda.set_device(opt.local_rank)
-torch.distributed.init_process_group(
-    'nccl',
-    init_method='env://'
-)
-device = torch.device(f'cuda:{opt.local_rank}')
 
 start_epoch, epoch_iter = 1, 0
 
 train_data = CreateDataset(opt)
-train_sampler = DistributedSampler(train_data)
+train_sampler = None
+
+if opt.num_gpus > 0:
+    torch.cuda.set_device(opt.local_rank)
+    torch.distributed.init_process_group(
+        'nccl',
+        init_method='env://'
+    )
+    device = torch.device(f'cuda:{opt.local_rank}')
+    train_sampler = DistributedSampler(train_data)
+else:
+    device = torch.device("cpu")
+
+
 train_loader = DataLoader(train_data, batch_size=opt.batchSize, shuffle=False,
-                                               num_workers=4, pin_memory=True, sampler=train_sampler)
+        num_workers=4, pin_memory=(device.type=="cuda"), sampler=train_sampler)
+
 dataset_size = len(train_loader)
 print('#training images = %d' % dataset_size)
 
 warp_model = AFWM(opt, 45)
 print(warp_model)
+#warp_model = warp_model.to(device)
 warp_model.train()
-warp_model.cuda()
-warp_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(warp_model).to(device)
 
-if opt.isTrain and len(opt.gpu_ids):
-    model = torch.nn.parallel.DistributedDataParallel(warp_model, device_ids=[opt.local_rank])
+
+if torch.cuda.is_available():
+    warp_model.cuda()
+    warp_model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(warp_model).to(device)
+
+if opt.isTrain:
+    if len(opt.gpu_ids) > 0:
+        model = torch.nn.parallel.DistributedDataParallel(warp_model, device_ids=[opt.local_rank])
+    else:
+        model = warp_model  # for CPU or 1 GPU is simple model without DDP
+else:
+    model = warp_model
+
 
 criterionL1 = nn.L1Loss()
 criterionVGG = VGGLoss()
@@ -119,9 +137,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             loss_edge = criterionL1(x_edge_all[num], cur_person_clothes_edge.cuda())
             b,c,h,w = delta_x_all[num].shape
             loss_flow_x = (delta_x_all[num].pow(2)+ epsilon*epsilon).pow(0.45)
-            loss_flow_x = torch.sum(loss_flow_x)/(b*c*h*w)
+            loss_flow_x = torch.sum(loss_flow_x) / (b*c*h*w)
             loss_flow_y = (delta_y_all[num].pow(2)+ epsilon*epsilon).pow(0.45)
-            loss_flow_y = torch.sum(loss_flow_y)/(b*c*h*w)
+            loss_flow_y = torch.sum(loss_flow_y) / (b*c*h*w)
             loss_second_smooth = loss_flow_x + loss_flow_y
             loss_all = loss_all + (num+1) * loss_l1 + (num + 1) * 0.2 * loss_vgg + (num+1) * 2 * loss_edge + (num + 1) * 6 * loss_second_smooth
 
