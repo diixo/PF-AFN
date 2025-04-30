@@ -182,6 +182,8 @@ class AFlowNet(nn.Module):
         weight_array[:, :, 0, 3] = filter_diag2
 
         weight_array = torch.cuda.FloatTensor(weight_array).permute(3,2,0,1)
+        #weight_array = torch.tensor(weight_array, dtype=torch.float32, device=torch.device("cpu")).permute(3, 2, 0, 1)
+
         self.weight = nn.Parameter(data=weight_array, requires_grad=False)
 
         for i in range(len(x_warps)):
@@ -248,7 +250,8 @@ class AFWM(nn.Module):
         cond_pyramids = self.cond_FPN(self.cond_features(cond_input)) # maybe use nn.Sequential
         image_pyramids = self.image_FPN(self.image_features(image_input))
 
-        x_warp, last_flow, last_flow_all, flow_all, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all = self.aflow_net(image_input, image_edge, image_pyramids, cond_pyramids)
+        x_warp, last_flow, last_flow_all, flow_all, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all = self.aflow_net(
+            image_input, image_edge, image_pyramids, cond_pyramids)
 
         return x_warp, last_flow, last_flow_all, flow_all, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all
 
