@@ -289,38 +289,46 @@ class _FunctionCorrelation(torch.autograd.Function):
 		assert(first.is_contiguous() == True)
 		assert(second.is_contiguous() == True)
 
-		output = first.new_zeros([ first.shape[0], 49, int(math.ceil(first.shape[2] / intStride)), int(math.ceil(first.shape[3] / intStride)) ])
+		output = first.new_zeros([
+			first.shape[0],
+			49,	# 7x7
+			int(math.ceil(first.shape[2] / intStride)),
+			int(math.ceil(first.shape[3] / intStride))
+			])
 
 		if first.is_cuda == True:
 			n = first.shape[2] * first.shape[3]
-			cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
+			kernel_fn = cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
 				'intStride': self.intStride,
 				'input': first,
 				'output': rbot0
-			}))(
+			}))
+			kernel_fn(
 				grid=tuple([ int((n + 16 - 1) / 16), first.shape[1], first.shape[0] ]),
 				block=tuple([ 16, 1, 1 ]),
 				args=[ n, first.data_ptr(), rbot0.data_ptr() ]
 			)
 
 			n = second.shape[2] * second.shape[3]
-			cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
+			kernel_fn = cupy_launch('kernel_Correlation_rearrange', cupy_kernel('kernel_Correlation_rearrange', {
 				'intStride': self.intStride,
 				'input': second,
 				'output': rbot1
-			}))(
+			}))
+			kernel_fn(
 				grid=tuple([ int((n + 16 - 1) / 16), second.shape[1], second.shape[0] ]),
 				block=tuple([ 16, 1, 1 ]),
 				args=[ n, second.data_ptr(), rbot1.data_ptr() ]
 			)
 
 			n = output.shape[1] * output.shape[2] * output.shape[3]
-			cupy_launch('kernel_Correlation_updateOutput', cupy_kernel('kernel_Correlation_updateOutput', {
+			kernel_fn = cupy_launch('kernel_Correlation_updateOutput', cupy_kernel('kernel_Correlation_updateOutput', {
 				'intStride': self.intStride,
 				'rbot0': rbot0,
 				'rbot1': rbot1,
 				'top': output
-			}))(
+			}))
+			kernel_fn(
 				grid=tuple([ output.shape[3], output.shape[2], output.shape[0] ]),
 				block=tuple([ 32, 1, 1 ]),
 				shared_mem=first.shape[1] * 4,
