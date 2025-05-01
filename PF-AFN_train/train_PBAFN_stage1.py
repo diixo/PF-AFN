@@ -97,8 +97,6 @@ if __name__ == "__main__":
     step = 0
     step_per_batch = dataset_size
 
-    if opt.local_rank == 0:
-        writer = SummaryWriter(path)
 
     for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
@@ -164,8 +162,6 @@ if __name__ == "__main__":
 
             loss_all = 0.01 * loss_smooth + loss_all
 
-            if opt.local_rank == 0:
-                writer.add_scalar('loss_all', loss_all, step)
 
             optimizer_warp.zero_grad()
             loss_all.backward()
@@ -184,7 +180,6 @@ if __name__ == "__main__":
                     f = torch.cat([warped_prod_edge, warped_prod_edge, warped_prod_edge], 1)
                     combine = torch.cat([a[0],b[0],c[0],d[0],e[0],f[0]], 2).squeeze()
                     cv_img=(combine.permute(1,2,0).detach().cpu().numpy() + 1)/2
-                    writer.add_image('combine', (combine.data + 1) / 2.0, step)
                     rgb=(cv_img*255).astype(np.uint8)
                     bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
                     cv2.imwrite('sample/'+opt.name+'/'+str(step)+'.jpg', bgr)
