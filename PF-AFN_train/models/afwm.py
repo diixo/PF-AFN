@@ -15,7 +15,7 @@ def apply_offset(offset):
         for dim, grid in enumerate(grid_list)]
     # normalize
     grid_list = [grid / ((size - 1.0) / 2.0) - 1.0
-        for grid, size in zip(grid_list, reversed(sizes))] 
+        for grid, size in zip(grid_list, reversed(sizes))]
 
     return torch.stack(grid_list, dim=-1)
 
@@ -47,7 +47,7 @@ class ResBlock(nn.Module):
 class DownSample(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DownSample, self).__init__()
-        self.block=  nn.Sequential(
+        self.block = nn.Sequential(
             nn.BatchNorm2d(in_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False)
@@ -85,8 +85,9 @@ class FeatureEncoder(nn.Module):
             encoder_features.append(x)
         return encoder_features
 
+
 class RefinePyramid(nn.Module):
-    def __init__(self, chns=[64,128,256,256,256], fpn_dim=256):
+    def __init__(self, chns=[64, 128, 256, 256, 256], fpn_dim=256):
         super(RefinePyramid, self).__init__()
         self.chns = chns
 
@@ -96,7 +97,7 @@ class RefinePyramid(nn.Module):
             adaptive_layer = nn.Conv2d(in_chns, fpn_dim, kernel_size=1)
             self.adaptive.append(adaptive_layer)
         self.adaptive = nn.ModuleList(self.adaptive)
-        # output conv
+        # smooth output conv layer
         self.smooth = []
         for i in range(len(chns)):
             smooth_layer = nn.Conv2d(fpn_dim, fpn_dim, kernel_size=3, padding=1)
@@ -181,14 +182,14 @@ class AFlowNet(nn.Module):
         weight_array[:, :, 0, 2] = filter_diag1
         weight_array[:, :, 0, 3] = filter_diag2
 
-        weight_array = torch.cuda.FloatTensor(weight_array).permute(3,2,0,1)
+        weight_array = torch.cuda.FloatTensor(weight_array).permute(3, 2, 0, 1)
         #weight_array = torch.tensor(weight_array, dtype=torch.float32, device=torch.device("cpu")).permute(3, 2, 0, 1)
 
         self.weight = nn.Parameter(data=weight_array, requires_grad=False)
 
         for i in range(len(x_warps)):
-              x_warp = x_warps[len(x_warps) - 1 - i]
-              x_cond = x_conds[len(x_warps) - 1 - i]
+              x_warp = x_warps[-i-1]
+              x_cond = x_conds[-i-1]
               cond_fea_all.append(x_cond)
 
               if last_flow is not None and warp_feature:
@@ -237,8 +238,8 @@ class AFWM(nn.Module):
 
     def __init__(self, opt, input_nc):
         super(AFWM, self).__init__()
-        num_filters = [64,128,256,256,256]
-        self.image_features = FeatureEncoder(3, num_filters) 
+        num_filters = [64, 128, 256, 256, 256]
+        self.image_features = FeatureEncoder(3, num_filters)
         self.cond_features = FeatureEncoder(input_nc, num_filters)
         self.image_FPN = RefinePyramid(num_filters)
         self.cond_FPN = RefinePyramid(num_filters)
@@ -256,7 +257,7 @@ class AFWM(nn.Module):
         return x_warp, last_flow, last_flow_all, flow_all, delta_list, x_all, x_edge_all, delta_x_all, delta_y_all
 
 
-    def update_learning_rate(self,optimizer):
+    def update_learning_rate(self, optimizer):
         lrd = opt.lr / opt.niter_decay
         lr = self.old_lr - lrd
         for param_group in optimizer.param_groups:
@@ -265,7 +266,7 @@ class AFWM(nn.Module):
             print('update learning rate: %f -> %f' % (self.old_lr, lr))
         self.old_lr = lr
 
-    def update_learning_rate_warp(self,optimizer):
+    def update_learning_rate_warp(self, optimizer):
         lrd = 0.2 * opt.lr / opt.niter_decay
         lr = self.old_lr_warp - lrd
         for param_group in optimizer.param_groups:
