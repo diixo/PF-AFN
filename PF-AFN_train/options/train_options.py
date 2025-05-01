@@ -1,10 +1,11 @@
 from .base_options import BaseOptions
 
+
 class TrainOptions(BaseOptions):
     def initialize(self):
         BaseOptions.initialize(self)
         # for displays
-        self.parser.add_argument('--launcher', choices=['none', 'pytorch'], default='none',help='job launcher')
+        self.parser.add_argument('--launcher', choices=['none', 'pytorch'], default='pytorch', help='job launcher')
         self.parser.add_argument('--local_rank', type=int, default=0)
 
         self.parser.add_argument('--display_freq', type=int, default=100, help='frequency of showing training results on screen')
