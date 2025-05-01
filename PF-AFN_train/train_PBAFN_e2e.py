@@ -8,8 +8,9 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from PIL import Image
 #from torch.utils.data.distributed import DistributedSampler
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 import cv2
 import datetime
 
@@ -26,7 +27,7 @@ def CreateDataset(opt):
     return dataset
 
 
-opt = TrainOptions().parse()
+# opt = TrainOptions().parse()
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
 
 torch.cuda.set_device(opt.local_rank)
@@ -181,8 +182,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             combine = torch.cat([a[0],b[0],c[0],d[0],e[0],f[0],g[0],h[0],i[0],j[0],k[0]], 2).squeeze()
             cv_img = (combine.permute(1,2,0).detach().cpu().numpy()+1)/2
             rgb = (cv_img*255).astype(np.uint8)
-            bgr = cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
-            cv2.imwrite('sample/'+opt.name+'/'+str(step)+'.jpg',bgr)
+            #img = Image.fromarray(rgb)
+            #img.save('sample/'+opt.name+'/'+str(step)+'.jpg')
+            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+            cv2.imwrite('sample/'+opt.name+'/'+str(step)+'.jpg', bgr)
 
         step += 1
         iter_end_time = time.time()
