@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
 
     dataset_size = len(train_loader)
-    print('#training images = %d' % dataset_size)
+    print('The number of training images = %d' % dataset_size)
 
     warp_model = AFWM(opt, 45)
     print(warp_model)
@@ -187,7 +187,7 @@ if __name__ == "__main__":
                     writer.add_image('combine', (combine.data + 1) / 2.0, step)
                     rgb=(cv_img*255).astype(np.uint8)
                     bgr=cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR)
-                    cv2.imwrite('sample/'+opt.name+'/'+str(step)+'.jpg',bgr)
+                    cv2.imwrite('sample/'+opt.name+'/'+str(step)+'.jpg', bgr)
 
             step += 1
             iter_end_time = time.time()
@@ -217,10 +217,10 @@ if __name__ == "__main__":
         if epoch % opt.save_epoch_freq == 0:
             if opt.local_rank == 0:
                 print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))        
-                save_checkpoint(model.module, os.path.join(opt.checkpoints_dir, opt.name, 'PBAFN_warp_epoch_%03d.pth' % (epoch+1)))
+                save_checkpoint(model, os.path.join(opt.checkpoints_dir, opt.name, 'PBAFN_warp_epoch_%03d.pth' % (epoch+1)))
 
         # ========================================
         # 1. model.module => model
         # ========================================
         if epoch > opt.niter:
-            model.module.update_learning_rate(optimizer_warp)
+            model.update_learning_rate(optimizer_warp)
