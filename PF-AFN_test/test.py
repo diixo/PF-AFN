@@ -46,7 +46,7 @@ for epoch in range(1,2):
         clothes = data['clothes']
         ##edge is extracted from the clothes image with the built-in function in python
         edge = data['edge']
-        edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int))
+        edge = torch.FloatTensor((edge.detach().numpy() > 0.5).astype(np.int32))
         clothes = clothes * edge        
 
         flow_out = warp_model(real_image.cuda(), clothes.cuda())
