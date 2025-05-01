@@ -137,7 +137,7 @@ class Vgg19(nn.Module):
             self.slice3.add_module(str(x), vgg_pretrained_features[x])
         for x in range(12, 21):
             self.slice4.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(21, 30):
+        for x in range(21, 30): #27
             self.slice5.add_module(str(x), vgg_pretrained_features[x])
         if not requires_grad:
             for param in self.parameters():
