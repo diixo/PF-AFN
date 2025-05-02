@@ -17,7 +17,7 @@ import datetime
 opt = TrainOptions().parse()
 path = 'runs/'+opt.name
 os.makedirs(path, exist_ok=True)
-os.makedirs('sample',exist_ok=True)
+os.makedirs('sample', exist_ok=True)
 
 def CreateDataset(opt):
     from data.aligned_dataset import AlignedDataset
