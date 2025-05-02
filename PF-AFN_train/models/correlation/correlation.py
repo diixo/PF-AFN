@@ -337,30 +337,7 @@ class _FunctionCorrelation(torch.autograd.Function):
 
 		elif first.is_cuda == False:
 			raise NotImplementedError()
-			"""
-			print("->>", self.intStride, first.shape, rbot0.shape)
-			kernel_str_0 = cupy_kernel('kernel_Correlation_rearrange', {
-				'intStride': self.intStride,
-				'input': first,
-				'output': rbot0
-			})
-			print(kernel_str_0)
-			print("-->>", self.intStride, second.shape, rbot1.shape)
-			kernel_str_1 = cupy_kernel('kernel_Correlation_rearrange', {
-				'intStride': self.intStride,
-				'input': second,
-				'output': rbot1
-			})
-			print(kernel_str_1)
-			print("--->>", self.intStride, rbot0.shape, rbot1.shape)
-			kernel_str_output = cupy_kernel('kernel_Correlation_updateOutput', {
-				'intStride': self.intStride,
-				'rbot0': rbot0,
-				'rbot1': rbot1,
-				'top': output
-			})
-			print(kernel_str_output)
-			"""
+
 		# end
 
 		return output
