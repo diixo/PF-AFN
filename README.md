@@ -89,6 +89,9 @@ The use of this code is RESTRICTED to non-commercial research and educational pu
 ## Acknowledgement
 Our code is based on the implementation of "Clothflow: A flow-based model for clothed person generation" (See the citation below), including the implementation of the feature pyramid networks (FPN) and the ResUnetGenerator, and the adaptation of the cascaded structure to predict the appearance flows. If you use our code, please also cite their work as below.
 
+## Experimental
+* [Flow-Style-VTON](https://github.com/senhe/flow-style-vton), where was replaced the **tensor correlation** based by new flow estimation with proposed style-based flow estimation.
+
 
 ## Citation
 If our code is helpful to your work, please cite:
