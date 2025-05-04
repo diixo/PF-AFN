@@ -46,6 +46,18 @@ opencv-python 4.5.1
 
 python 3.6
 
+
+## Virtual environment
+
+```bash
+py -3.6 -m venv venv36
+venv36\Scripts\activate
+py --version
+pip install torch==1.8.0 torchvision==0.3.0 opencv-python==4.5.1.48
+deactivate
+```
+
+
 ## Installation
 conda create -n tryon python=3.6
 
