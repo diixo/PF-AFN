@@ -98,7 +98,10 @@ if __name__ == "__main__":
     step_per_batch = dataset_size
 
 
-    for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
+    end_epoch = opt.niter + opt.niter_decay + 1
+    for epoch in range(start_epoch, end_epoch):
+        print(f"...on {epoch}th iter... ({end_epoch})")
+
         epoch_start_time = time.time()
         if epoch != start_epoch:
             epoch_iter = epoch_iter % dataset_size
