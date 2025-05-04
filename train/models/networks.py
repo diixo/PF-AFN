@@ -120,10 +120,16 @@ class ResUnetSkipConnectionBlock(nn.Module):
             return torch.cat([x, self.model(x)], 1)
 
 
-class Vgg19(nn.Module):
+# model="https://download.pytorch.org/models/vgg19-dcbb9e9d.pth"
+class Vgg19_Features(nn.Module):
     def __init__(self, requires_grad=False):
-        super(Vgg19, self).__init__()
+        super(Vgg19_Features, self).__init__()
         vgg_pretrained_features = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
+        # for torchvision >= 0.4.0 or torch >= 1.2.0
+        for x in vgg_pretrained_features.modules():
+            if isinstance(x, nn.MaxPool2d) or isinstance(x, nn.AdaptiveAvgPool2d):
+                x.ceil_mode = True
+
         self.slice1 = nn.Sequential()
         self.slice2 = nn.Sequential()
         self.slice3 = nn.Sequential()
@@ -137,7 +143,7 @@ class Vgg19(nn.Module):
             self.slice3.add_module(str(x), vgg_pretrained_features[x])
         for x in range(12, 21):
             self.slice4.add_module(str(x), vgg_pretrained_features[x])
-        for x in range(21, 30): #27
+        for x in range(21, 30):
             self.slice5.add_module(str(x), vgg_pretrained_features[x])
         if not requires_grad:
             for param in self.parameters():
@@ -155,7 +161,7 @@ class Vgg19(nn.Module):
 class VGGLoss(nn.Module):
     def __init__(self, layids = None):
         super(VGGLoss, self).__init__()
-        self.vgg = Vgg19()
+        self.vgg = Vgg19_Features()
         if torch.cuda.is_available():
             self.vgg = self.vgg.cuda()
         self.criterion = nn.L1Loss()
