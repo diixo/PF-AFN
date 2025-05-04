@@ -10,7 +10,7 @@ args_cpu = [
     '--resize_or_crop', 'None',
     '--num_gpus',  '0',
     '--gpu_ids',  '-1',
-    '--batchSize', '1',
+    '--batchSize', '4',
     '--verbose',
     '--tf_log',
 ]

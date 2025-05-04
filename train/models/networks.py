@@ -124,6 +124,8 @@ class ResUnetSkipConnectionBlock(nn.Module):
 class Vgg19_Features(nn.Module):
     def __init__(self, requires_grad=False):
         super(Vgg19_Features, self).__init__()
+
+        # https://github.com/pytorch/vision/blob/main/torchvision/models/vgg.py
         vgg_pretrained_features = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1).features
         # for torchvision >= 0.4.0 or torch >= 1.2.0
         for x in vgg_pretrained_features.modules():
